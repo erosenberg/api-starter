@@ -1,0 +1,5 @@
+/node_modules/
+/static/build/
+static/index.ejs
+/.vscode/chrome
+package-lock.json

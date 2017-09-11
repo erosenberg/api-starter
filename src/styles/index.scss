@@ -1,0 +1,15 @@
+@import './variables';
+@import '~bootstrap/scss/bootstrap';
+@import '~sass-material-colors';
+@import "~font-awesome/scss/font-awesome";
+@import './fonts';
+@import './colors';
+@import './layout';
+
+// components
+@import './Header';
+@import './Card';
+
+body {
+  background-color: $white;
+}
