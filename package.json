@@ -1,9 +1,9 @@
 {
-  "name": "eitanrosenberg.com",
-  "version": "4.0.0",
+  "name": "ball-roller",
+  "version": "1.0.0",
   "author": "Eitan Rosenberg <eitanrosenberg@gmail.com>",
-  "description": "Eitan Rosenberg's Portfolio",
-  "main": "index.js",
+  "description": "A project to help get the ball rolling.",
+  "main": "src/index.js",
   "license": "MIT",
   "scripts": {
     "watch:prod": "webpack -w",
