@@ -1,4 +1,4 @@
-import "babel-polyfill";
+import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
@@ -14,8 +14,8 @@ ReactDOM.render(
   <AppContainer>
     <App store={store} />
   </AppContainer>,
-  $rootEl
-)
+  $rootEl,
+);
 
 
 if (module.hot) {
@@ -28,7 +28,7 @@ if (module.hot) {
       <AppContainer>
         <NewApp store={newStore} />
       </AppContainer>,
-      $rootEl
-    )
-  })
+      $rootEl,
+    );
+  });
 }
