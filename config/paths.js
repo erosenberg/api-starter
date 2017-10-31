@@ -8,6 +8,7 @@ const srcPath = path.resolve(projectPath, 'src');
 const indexPath = path.resolve(srcPath, 'index.js');
 const imagesPath = path.resolve(buildPath, 'images');
 const nodeModulesPath = path.resolve(projectPath, 'node_modules');
+const indexViewPath = path.resolve(staticPath, 'index.ejs');
 
 module.exports = {
   staticPath,
@@ -16,5 +17,6 @@ module.exports = {
   indexPath,
   nodeModulesPath,
   projectPath,
-  imagesPath
+  imagesPath,
+  indexViewPath,
 };
