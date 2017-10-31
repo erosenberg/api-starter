@@ -1,14 +1,17 @@
+// settings
 @import './variables';
-@import '~bootstrap/scss/bootstrap';
+
+// lib
 @import '~sass-material-colors';
 @import "~font-awesome/scss/font-awesome";
+@import '~bulma';
+
 @import './fonts';
 @import './colors';
 @import './layout';
 
 // components
-@import './Header';
-@import './Card';
+@import './components/Header';
 
 body {
   background-color: $white;
