@@ -1,3 +1,1 @@
-export const AppState = {
-  data: {},
-};
+export const AppState = {};

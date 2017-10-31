@@ -24,22 +24,16 @@ export function fetchError(error) {
 
 
 // action creators
-export function setViewId(viewId) {
-  return {
-    type: actionTypes.SET_VIEW_ID,
-    viewId,
-  };
-}
 
 export const fetchData = () =>
   // make axios and thunk and async call here...
-  async (dispatch, getState) => {
+  async (dispatch) => {
     try {
-      const url = `/api/v1/portfolio`;
+      // this will hit our test url by default.
+      const url = '/api/v1/marco';
       const response = await axios.get(url);
       dispatch(setData(response.data));
     } catch (e) {
       dispatch(fetchError(e));
     }
-  }
-  ;
+  };

@@ -4,11 +4,6 @@ import { AppState } from '../store/initialState';
 
 function appReducer(state = AppState, action) {
   switch (action.type) {
-    case actionTypes.SET_VIEW_ID:
-      return {
-        ...state,
-        viewId: action.viewId,
-      };
     case actionTypes.SET_DATA:
       return {
         ...state,
