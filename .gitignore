@@ -1,5 +1,25 @@
+# dependencies
 /node_modules/
+package-lock.json
+yarn.lock
+/.vscode/chrome
+=3.0.0
+*.lock
+
+# api dependencies
+/api/node_modules/
+/api/.yarnclean
+/api/yarn-error.log
+/api/build/
+
+# environment config
+.env/
+
+# built files
 /static/build/
 static/index.ejs
+/api/build/
+*.db
+
+# editor config
 /.vscode/chrome
-package-lock.json
