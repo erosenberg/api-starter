@@ -12,7 +12,8 @@ package-lock.json
 /api/build/
 
 # environment config
-.env/
+# when you've added sensitive information, add this folder back in.
+# .env/
 
 # built files
 /static/build/
