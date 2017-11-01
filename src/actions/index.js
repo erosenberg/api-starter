@@ -30,8 +30,8 @@ export const fetchData = () =>
   async (dispatch) => {
     try {
       // this will hit our test url by default.
-      const API_URL = '/api/v1/';
-      const url = '/marco';
+      const API_URL = '/api/v1';
+      const url = `${API_URL}/marco`;
       const response = await axios.get(url);
       dispatch(setData(response.data));
     } catch (e) {

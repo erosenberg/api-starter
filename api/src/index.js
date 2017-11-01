@@ -9,7 +9,7 @@ app.get('/marco', (req, res) => {
 });
 
 // you'll use this when you're ready to start creating routes.
-// app.use('/api/v1', v1);
+app.use('/api/v1', v1);
 
 app.listen(API_SERVER_PORT, () => {
   console.log(`Listening on port ${API_SERVER_PORT}!`);
