@@ -13,7 +13,7 @@ package-lock.json
 
 # environment config
 # when you've added sensitive information, add this folder back in.
-# .env/
+.env/
 
 # built files
 /static/build/
