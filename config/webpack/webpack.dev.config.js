@@ -45,11 +45,12 @@ const config = _.merge(baseConfig, {
     port: DEV_SERVER_PORT,
     historyApiFallback: true,
     proxy: {
-      '**': {
+      '/api/**': {
         target: `${SERVER_PROTOCOL}://${SERVER_HOST}:${API_SERVER_PORT}`,
         changeOrigin: true,
         secure: false,
         logLevel: 'debug',
+        pathRewrite: { '^/api': '/api' },
       },
     },
   },
