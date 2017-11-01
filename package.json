@@ -9,7 +9,9 @@
     "dev:build": "env-cmd .env/dev.env webpack-dev-server --config ./config/webpack/webpack.dev.config.js",
     "prod:build": "env-cmd .env/prod.env webpack --config ./config/webpack/webpack.prod.config.js",
     "prod:serve": "env-cmd .env/prod.env node server",
-    "dev": "concurrently --kill-others 'npm run dev:build'",
+    "dev:serve": "env-cmd .env/dev.env nodemon server",
+    "dev:api": "cd api && npm run dev",
+    "dev": "npm-run-all --parallel dev:build dev:api",
     "prod": "npm run build:prod && npm run prod:serve"
   },
   "dependencies": {
