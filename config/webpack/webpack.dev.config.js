@@ -1,28 +1,47 @@
 const webpack = require('webpack');
-const _ = require('lodash');
+const { merge, concat } = require('lodash');
+const autoprefixer = require('autoprefixer');
 const path = require('path');
-const paths = require('../paths');
-const baseConfig = require('./webpack.config.js');
+const history = require('connect-history-api-fallback');
+const proxy = require('http-proxy-middleware');
+const magicImporter = require('node-sass-magic-importer');
+const convert = require('koa-connect');
+
+// plugins
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const DashboardPlugin = require('webpack-dashboard/plugin');
 
-const {
-  DEV_SERVER_PORT,
-  API_SERVER_PORT,
-  SERVER_HOST,
-  SERVER_PROTOCOL,
-} = process.env;
+// utils
+const baseConfig = require('./webpack.config.js');
+const paths = require('../paths');
 
-const config = _.merge(baseConfig, {
+const { API_URI } = process.env;
+
+const serverConfig = {
+  content: [__dirname],
+  add: (app) => {
+    // ... see: https://github.com/bripkens/connect-history-api-fallback#options
+    const historyOptions = {
+      logger: console.log.bind(console),
+      verbose: true,
+      index: baseConfig.output.publicPath,
+      // disableDotRule: true,
+    };
+    app.use(convert(proxy('/api/**', {
+      target: API_URI,
+      changeOrigin: true,
+      secure: false,
+      logLevel: 'debug',
+    })));
+    app.use(convert(history(historyOptions)));
+  },
+};
+
+const config = merge(baseConfig, {
+  mode: 'development',
+  context: __dirname,
+  devtool: 'inline-source-map',
   entry: {
-    bundle: [
-      `webpack-dev-server/client?${SERVER_PROTOCOL}://${SERVER_HOST}:${DEV_SERVER_PORT}`,
-      'webpack/hot/only-dev-server',
-      'react-hot-loader/patch',
-      paths.indexPath,
-    ],
+    bundle: ['react-hot-loader/patch', paths.indexPath],
   },
   output: {
     filename: '[name].js',
@@ -30,52 +49,63 @@ const config = _.merge(baseConfig, {
     publicPath: baseConfig.output.publicPath,
   },
   module: {
-    rules: _.concat(baseConfig.module.rules, [{
-      test: /\.js$/,
-      loader: 'source-map-loader',
-      enforce: 'pre',
-    }]),
-  },
-  devtool: 'cheap-module-eval-source-map',
-  devServer: {
-    contentBase: paths.buildPath,
-    publicPath: baseConfig.output.publicPath,
-    hot: true,
-    host: SERVER_HOST,
-    port: DEV_SERVER_PORT,
-    historyApiFallback: true,
-    proxy: {
-      '/api/**': {
-        target: `${SERVER_PROTOCOL}://${SERVER_HOST}:${API_SERVER_PORT}`,
-        changeOrigin: true,
-        secure: false,
-        logLevel: 'debug',
-        pathRewrite: { '^/api': '/api' },
+    rules: concat(baseConfig.module.rules, [
+      {
+        test: /\.js$/,
+        loader: 'source-map-loader',
+        enforce: 'pre',
+        exclude: /node_modules/,
       },
-    },
+      {
+        test: /\.css$/,
+        loader: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              sourceMap: true,
+              plugins() {
+                return [autoprefixer('last 2 version')];
+              },
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+              importer: magicImporter(),
+            },
+          },
+        ],
+      },
+    ]),
   },
   resolve: {
     extensions: ['.js', '.json'],
   },
-  plugins: _.concat(baseConfig.plugins, [
-    new webpack.EnvironmentPlugin({
-      DEV_SERVER_PORT,
-    }),
-    new webpack.SourceMapDevToolPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
+  plugins: concat(baseConfig.plugins, [
+    new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new HtmlWebpackPlugin({
-      template: path.resolve(paths.srcPath, 'views', 'index.ejs'),
+      filename: 'index.html',
+      favicon: path.resolve('static/favicon.png'),
+      template: path.resolve('src/views', 'index.ejs'),
       inject: 'body',
     }),
-    new HtmlWebpackHarddiskPlugin({
-      outputPath: path.resolve(paths.buildPath),
-    }),
-    new ExtractTextPlugin({
-      disable: true,
-    }),
-    new DashboardPlugin(),
   ]),
 });
 
 module.exports = config;
+module.exports.serve = serverConfig;

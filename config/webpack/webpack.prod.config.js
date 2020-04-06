@@ -1,43 +1,118 @@
-const webpack = require('webpack');
-const _ = require('lodash');
 const path = require('path');
+const { merge, concat } = require('lodash');
+const autoprefixer = require('autoprefixer');
+const OfflinePlugin = require('offline-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CompressionWebpackPlugin = require('compression-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const MinifyPlugin = require('babel-minify-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const paths = require('../paths');
 const baseConfig = require('./webpack.config.js');
+const paths = require('../paths');
 
-const config = _.merge(baseConfig, {
+const config = merge(baseConfig, {
+  mode: 'production',
   output: {
     filename: '[name]-[hash].min.js',
     sourceMapFilename: '[name].map',
     publicPath: '/build/',
   },
-  plugins: _.concat(baseConfig.plugins, [
+  module: {
+    rules: concat(baseConfig.module.rules, [
+      {
+        test: /\.css$/,
+        loader: [MiniCssExtractPlugin.loader, 'css-loader'],
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: [autoprefixer('last 2 version')],
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
+      },
+    ]),
+  },
+  optimization: {
+    runtimeChunk: false,
+    splitChunks: {
+      name: false,
+      chunks: 'all',
+      cacheGroups: {
+        commons: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    },
+    minimizer: [
+      new UglifyJsPlugin({
+        cache: true,
+        parallel: true,
+        extractComments: true,
+      }),
+      new OptimizeCSSAssetsPlugin({}),
+    ],
+  },
+  plugins: concat(baseConfig.plugins, [
     new CleanWebpackPlugin('static/build', {
       root: paths.projectPath,
     }),
-    new webpack.optimize.OccurrenceOrderPlugin(),
-    new MinifyPlugin(),
-    new ExtractTextPlugin('[name]-[hash].min.css'),
-    new OptimizeCssAssetsPlugin({
-      assetNameRegExp: /\.css$/g,
-      cssProcessorOptions: {
-        discardComments: {
-          minimize: true,
-          removeAll: true,
-        },
-      },
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: '[name].[chunkhash].min.css',
     }),
     new HtmlWebpackPlugin({
-      filename: path.resolve(paths.staticPath, 'index.ejs'),
+      filename: path.resolve(paths.staticPath, 'index.html'),
       template: path.resolve(paths.srcPath, 'views', 'index.ejs'),
+      favicon: path.resolve(paths.staticPath, 'favicon.png'),
       inject: 'body',
+      sourceMap: true,
+      chunksSortMode: 'dependency',
+    }),
+    new CompressionWebpackPlugin({
+      asset: '[path].gz[query]',
+      algorithm: 'gzip',
+      test: new RegExp('\\.(js|css)$'),
+      threshold: 10240,
+      minRatio: 0.8,
+    }),
+    new OfflinePlugin({
+      caches: 'all',
+      AppCache: false,
+      ServiceWorker: {
+        minify: false,
+      },
     }),
   ]),
 });
+
+if (process.env.NODE_ANALYZE) {
+  config.plugins.push(new BundleAnalyzerPlugin());
+}
 
 module.exports = config;

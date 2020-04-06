@@ -1,17 +1,21 @@
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const paths = require('../paths');
+const env = require('./defaultEnv');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
+const resolve = require('./webpack.resolve.config');
 
-const {
-  NODE_ENV,
-  BABEL_ENV,
-  SERVER_PORT,
-  API_SERVER_PORT,
-  SERVER_HOST,
-  SERVER_PROTOCOL,
-} = process.env;
+process.traceDeprecation = true;
 
 const config = {
+  stats: {
+    cached: false,
+    cachedAssets: false,
+    chunks: false,
+    chunkModules: false,
+    chunkOrigins: false,
+    modules: false,
+  },
   entry: {
     bundle: ['babel-polyfill', paths.indexPath],
   },
@@ -21,52 +25,63 @@ const config = {
     publicPath: '/',
   },
   module: {
-    rules: [{
-      test: /\.js$/,
-      exclude: [paths.nodeModulesPath],
-      loader: 'babel-loader',
-    }, {
-      test: /\.scss$/,
-      use: ExtractTextPlugin.extract({
-        fallback: 'style-loader',
-        // resolve-url-loader may be chained before sass-loader if necessary
-        use: ['css-loader', 'sass-loader'],
-      }),
-    }, {
-      test: /.(png|jpg|jpeg|gif|svg)$/,
-      exclude: [paths.nodeModulesPath],
-      use: [
-        {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: [paths.nodeModulesPath],
+        loader: 'babel-loader',
+      },
+      {
+        test: /.(png|jpg|jpeg|gif)$/,
+        exclude: [paths.nodeModulesPath],
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name]-[hash].[ext]',
+              outputPath: 'images/',
+            },
+          },
+        ],
+      },
+      {
+        test: /\.svg$/,
+        oneOf: [
+          {
+            resourceQuery: /inline/,
+            use: {
+              loader: 'svg-react-loader',
+              options: {
+                outputPath: 'images/',
+              },
+            },
+          },
+          {
+            use: {
+              loader: 'file-loader',
+              options: {
+                outputPath: 'images/',
+              },
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(eot|ttf|woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
+        use: {
           loader: 'file-loader',
           options: {
-            name: '[name]-[hash].[ext]',
-            outputPath: 'images/',
+            outputPath: 'fonts/',
           },
         },
-      ],
-    },
-    {
-      test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      loader: 'url-loader?limit=10000&mimetype=application/font-woff',
-    },
-    {
-      test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      loader: 'file-loader',
-    }],
+      },
+    ],
   },
-  resolve: {
-    extensions: ['.js', '.json'],
-  },
+  resolve, // <-- this is separated out into webpack.resolve.config.js for reuse with other plugins.
   plugins: [
-    new webpack.EnvironmentPlugin({
-      NODE_ENV,
-      BABEL_ENV,
-      SERVER_PORT,
-      API_SERVER_PORT,
-      SERVER_HOST,
-      SERVER_PROTOCOL,
-    }),
-    new ExtractTextPlugin('[name].css'),
+    new FriendlyErrorsWebpackPlugin(),
+    new webpack.EnvironmentPlugin(env),
+    new ProgressBarPlugin(),
   ],
 };
 
