@@ -1,24 +1,8 @@
 # dependencies
-/node_modules/
-package-lock.json
-/.vscode/chrome
-=3.0.0
+node_modules
 *.lock
-
-# api dependencies
-/api/node_modules/
-/api/.yarnclean
-/api/yarn-error.log
-/api/build/
 
 # environment config
 # when you've added sensitive information, add this folder back in.
-.env/
-
-# built files
-/static/build/
-static/index.ejs
-*.db
-
-# editor config
-/.vscode/chrome
+.env
+dist

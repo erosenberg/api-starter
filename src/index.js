@@ -1,34 +1,17 @@
-import 'babel-polyfill';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { AppContainer } from 'react-hot-loader';
-import _ from 'lodash';
+import express from 'express';
+import v1 from './routes/v1';
 
-import { configureStore } from './store';
-import App from './App';
+const { API_SERVER_PORT } = process.env;
+const port = API_SERVER_PORT || 3000;
+const app = express();
 
-const $rootEl = document.getElementById('root');
-const store = configureStore();
+app.get('/marco', (req, res) => {
+  res.send('polo');
+});
 
-ReactDOM.render(
-  <AppContainer>
-    <App store={store} />
-  </AppContainer>,
-  $rootEl,
-);
+// you'll use this when you're ready to start creating routes.
+app.use('/api/v1', v1);
 
-
-if (module.hot) {
-  module.hot.accept('./App', () => {
-    const newConfigureStore = require('./store');
-    const newStore = newConfigureStore.configureStore();
-    const NewApp = require('./App').default;
-
-    ReactDOM.render(
-      <AppContainer>
-        <NewApp store={newStore} />
-      </AppContainer>,
-      $rootEl,
-    );
-  });
-}
+app.listen(port, () => {
+  console.log(`Listening on port ${port}!`);
+});
